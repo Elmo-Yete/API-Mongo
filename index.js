@@ -37,7 +37,7 @@ const koderSchema = new mongoose.Schema({
 
 // modelo  (va en mayus y siempre es en singular )
 
-const Koder = mongoose.model("koders",koderSchema)
+const Koder = mongoose.model("Koders", koderSchema, "Koders");
 
 
 
