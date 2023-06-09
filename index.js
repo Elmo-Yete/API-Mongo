@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const { options } = require("nodemon/lib/config");
+const { devoptions } = require("nodemon/lib/config");
 
 const app = express();
 
@@ -162,7 +162,7 @@ app.delete ("/koders/:id", async (request,response)=>{
 app.patch("/koders/:id", async (req,res)=> {
     const {id} = req.params
     try {
-        const updateKoder = await Koder.findByIdAndUpdate(id,{name:"Ale modificada"})
+        const updateKoder = await Koder.findByIdAndUpdate(id,{name:"test2"},{returnDocument:'after'})
         if (id.length === 0) {
             res.json ({
                 message:"No se ingreso un ID"
@@ -171,7 +171,7 @@ app.patch("/koders/:id", async (req,res)=> {
         res.status(200);
         res.json({
             succes:true,
-            message:`El koder con el ID:${id}fue actualizado`,
+            message:`El koder ${updateKoder.name} fue actualizado`,
             data:updateKoder
         })
     } catch (error) {
