@@ -4,7 +4,7 @@ const { devoptions } = require("nodemon/lib/config");
 
 const app = express();
 
-// * primer middleware
+// * primer middleware que parsea los inputs del usuario 
 app.use(express.json())
 
 // TODO: generar un objeto con estructura y se le pasa a mongo
@@ -43,16 +43,26 @@ const koderSchema = new mongoose.Schema({
 
 const Koder = mongoose.model("Koders", koderSchema, "Koders");
 
-// ? middleware de prueba con obj date
+// ? middleware de metodo
 app.use((req, res, next) => {
-    console.log('Time:', Date.now())
+    console.log(`El metodo es ${req.method}`)
     next()
 })
-// ? midd encapsulado 
+// ? midd encapsulado de obteniendo koder
+
 const capsuladeMidd = (req,res,next) => {
-    console.log("soy un mid encapsulado en una const")
+    console.log("Obteniendo Koder...")
     next()
 }
+
+const middCreate = (req,res,next) => {
+    let newReq = Object.keys(req.body)
+    if (newReq.length === 0) {
+        console.log("No estas ingresando ningun valor")
+    }
+    next()
+}
+
 // ! conectar BD
 const URL = "mongodb+srv://ElmoYete:MWXfjrtCSa0vqO69@cluster0.kvpeegn.mongodb.net/Kodemia"
 
@@ -67,31 +77,31 @@ mongoose.connect(URL)
     console.log("No conecto",error)
 })
 
-app.get ("/",capsuladeMidd,(req,res)=> {
+app.get ("/",(req,res)=> {
     res.json("Estamos en el home")
 })
 
+ // ! este endpoint esta chocando con el ID checar porque
+// app.get ("/koders", async (request,response)=> {
+//     try {
+//         const {name} = request.query
+//         // * acceder a la bd
+//         const koders = await Koder.find(name);
+//         // * console.log("koders",koders)
+//         response.json({
+//             succes:true,
+//             data:koders
+//         })
+//     }catch(error) {
+//         response.status(400)
+//         response.json({
+//             succes:false,
+//             message:error.message
+//         })
+//     }
+// })
 
-app.get ("/koders", async (request,response)=> {
-    try {
-        // * const {name} = request.query
-        // * acceder a la bd
-        const koders = await Koder.find(request.query);
-        // * console.log("koders",koders)
-        response.json({
-            succes:true,
-            data:koders
-        })
-    }catch(error) {
-        response.status(400)
-        response.json({
-            succes:false,
-            message:error.message
-        })
-    }
-})
-
-app.post("/koders", async (request,response)=> {
+app.post("/koders",middCreate,async (request,response)=> {
 try {
 // * console.log("request:",request.body)
     const koder = await  Koder.create(request.body)
@@ -101,6 +111,7 @@ try {
         data:koder
     })
 } catch (error) {
+    middCreate
     response.status(400)
     response.json ({
         succes:false,
@@ -109,7 +120,7 @@ try {
 }
 })
 
-app.get ("/koders/:id", async (request,response)=> {
+app.get ("/koders/:id",capsuladeMidd, async (request,response)=> {
     const {id} = request.params
     try {
         const koder = await Koder.findById(id);
@@ -162,7 +173,7 @@ app.delete ("/koders/:id", async (request,response)=>{
 app.patch("/koders/:id", async (req,res)=> {
     const {id} = req.params
     try {
-        const updateKoder = await Koder.findByIdAndUpdate(id,{name:"test2"},{returnDocument:'after'})
+        const updateKoder = await Koder.findByIdAndUpdate(id,{name:"Liz"},{returnDocument:'after'})
         if (id.length === 0) {
             res.json ({
                 message:"No se ingreso un ID"
